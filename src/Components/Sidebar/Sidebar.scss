@@ -1,0 +1,66 @@
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 1201;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e5e7eb;
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background-color: #fff;
+    padding-top: 24px;
+
+    img {
+      object-fit: contain;
+      width: 100%;
+    }
+  }
+
+  // Target permanent drawer paper for static styles
+  .MuiDrawer-paper {
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    border-right: none !important;
+    position: relative !important;
+    transition: width 0.25s ease !important;
+  }
+
+  .nav-list {
+    margin-top: 8px;
+
+    .nav-item {
+      margin: 4px 8px;
+      border-radius: 16px !important;
+      min-height: 44px;
+
+      &.Mui-selected {
+        background-color: #eef0fe !important;
+        color: #4f63f5;
+
+        .MuiListItemIcon-root {
+          color: #4f63f5;
+        }
+
+        &:hover {
+          background-color: #eef0fe !important;
+        }
+      }
+
+      &:hover {
+        background-color: #f0f2ff;
+      }
+    }
+  }
+
+  .toggle-btn {
+    display: flex;
+    padding: 6px 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+}

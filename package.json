@@ -16,12 +16,16 @@
     "@material-ui/icons": "^4.11.3",
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
+    "@reduxjs/toolkit": "^2.12.0",
     "axios": "^1.16.1",
     "dayjs": "^1.11.21",
     "formik": "^2.4.9",
+    "notistack": "^3.0.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-redux": "^9.3.0",
     "react-router-dom": "^7.16.0",
+    "redux-persist": "^6.0.0",
     "sass": "^1.100.0",
     "yup": "^1.7.1"
   },
@@ -29,11 +33,13 @@
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/redux-logger": "^3.0.13",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "redux-logger": "^3.0.6",
     "vite": "^8.0.12"
   }
 }
