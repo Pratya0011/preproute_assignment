@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.scss";
 import { RouterProvider } from "react-router-dom";
 import router from "./router";
 import { Provider } from "react-redux";

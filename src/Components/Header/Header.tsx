@@ -29,17 +29,19 @@ interface HeaderProps {
 
 function Header({ sidebarOpen }: HeaderProps) {
   const navigate = useNavigate();
-  const user: any = useSelector(
+  const loggedInUserDetails: any = useSelector(
     (state: RootState) => state.common.loggedInUserDetails,
   );
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const fullName = user?.name || user?.fullName || "Alex Wando";
-  const role = user?.role
-    ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+  const fullName =
+    loggedInUserDetails?.name || loggedInUserDetails?.fullName || "Alex Wando";
+  const role = loggedInUserDetails?.role
+    ? loggedInUserDetails.role.charAt(0).toUpperCase() +
+      loggedInUserDetails.role.slice(1)
     : "Admin";
-  const email = user?.email || "";
-  const tenant = user?.tenant || "";
+  const email = loggedInUserDetails?.email || "";
+  const tenant = loggedInUserDetails?.tenant || "";
   const initials = fullName
     .split(" ")
     .map((n: string) => n[0])

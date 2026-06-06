@@ -1,0 +1,158 @@
+.dashboard-container {
+  padding: 3rem 2rem 2rem 2rem;
+  height: 100%;
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .dashboard-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+    }
+  }
+
+  .dashboard-filter-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .filter-toggle-group {
+      background-color: #f3f4f6;
+      border-radius: 34px !important;
+      padding: 4px;
+      gap: 4px;
+      border: none !important;
+
+      .filter-toggle-btn {
+        height: 40px;
+        text-transform: none !important;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6b7280;
+        border: none !important;
+        border-radius: 30px !important;
+        transition: all 0.2s ease;
+
+        &.Mui-selected {
+          background-color: #fff !important;
+          color: #4f63f5 !important;
+          font-weight: 600;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        &:hover:not(.Mui-selected) {
+          background-color: #e9eaec;
+        }
+
+        &--left {
+          border-bottom-left-radius: 30px !important;
+          border-top-left-radius: 30px !important;
+        }
+
+        &--right {
+          border-bottom-right-radius: 30px !important;
+          border-top-right-radius: 30px !important;
+        }
+      }
+    }
+  }
+
+  .dashboard-table {
+    margin-top: 24px;
+    width: 100%;
+
+    .test-data-grid {
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      font-size: 14px;
+      background: #ffffff;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+
+      .MuiDataGrid-columnHeaders {
+        background: #fafbfc;
+        border-bottom: 1px solid #eef2f7;
+        font-weight: 600;
+        color: #475569;
+      }
+
+      .MuiDataGrid-row {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: #f8fafc;
+        }
+      }
+
+      .MuiDataGrid-cell {
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        color: #0f172a;
+      }
+
+      .status-chip {
+        font-size: 12px;
+        font-weight: 500;
+        height: 24px;
+      }
+
+      .action-cell {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .action-btn {
+          border-radius: 8px;
+
+          &--view {
+            color: #64748b;
+          }
+
+          &--edit {
+            color: #6366f1;
+          }
+
+          &--delete {
+            color: #ef4444;
+          }
+
+          &:hover {
+            background-color: #f8fafc;
+          }
+        }
+      }
+    }
+  }
+
+  .dashboard-search {
+    width: 280px;
+
+    .MuiOutlinedInput-root {
+      border-radius: 34px;
+      background-color: #f3f4f6;
+      font-size: 14px;
+
+      fieldset {
+        border-color: transparent;
+      }
+
+      &:hover fieldset {
+        border-color: #d1d5db;
+      }
+
+      &.Mui-focused fieldset {
+        border-color: #4f63f5;
+        border-width: 1px;
+      }
+    }
+
+    .search-icon {
+      font-size: 20px;
+      color: #9ca3af;
+    }
+  }
+}

@@ -30,6 +30,7 @@ function authWrapper(props: any) {
       const { status, body } = await postApi("/auth/login", value);
       if (status >= 400 && status <= 599) {
         enqueueSnackbar("Invalid Credentials", { variant: "error" });
+        return;
       }
       if (status === 200) {
         localStorage.setItem("token", body.data.token);

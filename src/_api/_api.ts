@@ -10,6 +10,17 @@ const handleLogout = () => {
   // window.location.href = "/";
 };
 axiosApi.interceptors.request.use(async function (configurations: any) {
+  const accessToken = localStorage.getItem("token");
+  if (
+    accessToken &&
+    accessToken !== "undefined" &&
+    accessToken !== null &&
+    accessToken !== undefined
+  ) {
+    if (configurations.headers) {
+      configurations.headers.Authorization = `Bearer ${accessToken}`;
+    }
+  }
   // add loader
   if (!configurations.headers[`noLoader`]) {
     document.body.classList.add("loading-indicator");

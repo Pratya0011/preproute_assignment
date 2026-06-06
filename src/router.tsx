@@ -10,7 +10,7 @@ const PageLoader = () => (
 
 const Root = lazy(() => import("./Root"));
 const AuthWrapper = lazy(() => import("./authWrapper"));
-const Dashboard = lazy(() => import("./Components/Dashboard"));
+const Dashboard = lazy(() => import("./Components/Dashboard/Dashboard"));
 
 const router = createBrowserRouter([
   {

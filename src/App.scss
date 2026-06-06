@@ -14,6 +14,22 @@ body {
   }
 }
 
+html body .MuiButton-root.MuiButton-contained,
+html body .MuiButton-root.MuiButton-containedPrimary {
+  background-color: #7489ff !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+  padding: 10px 20px !important;
+
+  &:hover {
+    background-color: #4a69e2 !important;
+    box-shadow: none !important;
+  }
+}
+
 .loading {
   pointer-events: all;
   z-index: 99999;
