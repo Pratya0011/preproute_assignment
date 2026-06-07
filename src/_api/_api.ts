@@ -61,39 +61,6 @@ export const getApi = async (url: string, customHeaders?: any) => {
   }
 };
 
-export const getByIdApi = async (
-  url: string,
-  id: number,
-  customHeaders?: any,
-) => {
-  try {
-    const result = await axiosApi.get(`${url}?id=${id}`, customHeaders);
-    return {
-      status: result.status,
-      body: result.data,
-    };
-  } catch (err: any) {
-    const body = err?.response?.data
-      ? err?.response?.data
-      : "Failed to connect";
-    const status = err?.response?.status ? err?.response?.status : 500;
-    return { status, body };
-  }
-};
-
-export const getByParamsApi = async (url: string, params: any) => {
-  try {
-    const result = await axiosApi.get(`${url}`, { params: params });
-    return {
-      status: result.status,
-      body: result.data,
-    };
-  } catch (err: any) {
-    const result = err.response;
-    return { status: result.status, body: result.data };
-  }
-};
-
 export const putApi = async (
   url: string,
   request: any,

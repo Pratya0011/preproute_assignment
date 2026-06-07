@@ -58,52 +58,6 @@
           line-height: 150%;
         }
 
-        .input-group {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-bottom: 20px;
-
-          .input-label {
-            font-size: 16px;
-            font-weight: 500;
-            color: #374151;
-            line-height: 150%;
-          }
-
-          .form-input {
-            .MuiOutlinedInput-root {
-              border-radius: 8px;
-              background-color: #fff;
-
-              fieldset {
-                border-color: #d1d5db;
-                border-width: 1px;
-              }
-
-              &:hover fieldset {
-                border-color: #9ca3af;
-              }
-
-              &.Mui-focused fieldset {
-                border-color: #5b7af5;
-                border-width: 1px;
-              }
-            }
-
-            input {
-              padding: 14px 16px;
-              font-size: 14px;
-              color: #374151;
-
-              &::placeholder {
-                color: #9ca3af;
-                opacity: 1;
-              }
-            }
-          }
-        }
-
         .forgot-password {
           font-size: 14px;
           color: #5b7af5;

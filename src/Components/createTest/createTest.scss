@@ -1,0 +1,75 @@
+.create-test-container {
+  padding: 3rem 2rem 2rem 2rem;
+  height: 100%;
+}
+
+.create-test-type-tabs {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2px 10px;
+  margin-top: 2rem;
+  gap: 30px;
+}
+
+.create-test-type-tab {
+  padding: 3px 11px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: none;
+  transition:
+    background 0.2s,
+    color 0.2s;
+
+  &:hover {
+    color: #384ec7;
+  }
+
+  &.active {
+    background: #f8faff;
+    color: #384ec7;
+  }
+}
+
+.form-container {
+  margin: 2rem 0;
+}
+
+.form-container .MuiFormControlLabel-root {
+  margin-right: 6rem;
+
+  .MuiRadio-root {
+    color: #7489ff;
+    margin-top: 0.5rem;
+  }
+
+  .MuiFormControlLabel-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #374151;
+    margin-top: 0.5rem;
+  }
+}
+
+.schema-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 2rem;
+}

@@ -22,81 +22,10 @@ import { useCallback, useEffect, useState } from "react";
 import { getApi } from "../../_api/_api";
 import "./Dashboard.scss";
 import { ITest } from "./helper";
-
-const statusConfig: Record<
-  string,
-  { label: string; color: "success" | "warning" | "error" | "default" }
-> = {
-  live: { label: "Live", color: "success" },
-  draft: { label: "Draft", color: "warning" },
-  scheduled: { label: "Scheduled", color: "default" },
-  expired: { label: "Expired", color: "error" },
-};
-
-const columns: GridColDef[] = [
-  {
-    field: "name",
-    headerName: "Name",
-    flex: 1,
-    minWidth: 180,
-  },
-  {
-    field: "subject",
-    headerName: "Subject",
-    flex: 1,
-    minWidth: 150,
-  },
-  {
-    field: "status",
-    headerName: "Status",
-    flex: 0.5,
-    width: 120,
-    renderCell: (params) => {
-      const config = statusConfig[params.value] ?? {
-        label: params.value,
-        color: "default",
-      };
-      return (
-        <Chip
-          label={config.label}
-          color={config.color}
-          size="small"
-          className="status-chip"
-        />
-      );
-    },
-  },
-  {
-    field: "created_at",
-    headerName: "Created Date",
-    flex: 0.5,
-    width: 150,
-    renderCell: (params) => dayjs(params.value).format("DD MMM YYYY"),
-  },
-  {
-    field: "actions",
-    headerName: "Actions",
-    flex: 0.5,
-    width: 130,
-    sortable: false,
-    filterable: false,
-    renderCell: (_params) => (
-      <Grid className="action-cell">
-        <IconButton size="small" className="action-btn action-btn--view">
-          <VisibilityOutlined fontSize="small" />
-        </IconButton>
-        <IconButton size="small" className="action-btn action-btn--edit">
-          <EditOutlined fontSize="small" />
-        </IconButton>
-        <IconButton size="small" className="action-btn action-btn--delete">
-          <DeleteOutlined fontSize="small" />
-        </IconButton>
-      </Grid>
-    ),
-  },
-];
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [testList, setTestList] = useState<ITest[]>([]);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -118,11 +47,86 @@ function Dashboard() {
     getAllTests();
   }, [getAllTests]);
 
+  const statusConfig: Record<
+    string,
+    { label: string; color: "success" | "warning" | "error" | "default" }
+  > = {
+    live: { label: "Live", color: "success" },
+    draft: { label: "Draft", color: "warning" },
+    scheduled: { label: "Scheduled", color: "default" },
+    expired: { label: "Expired", color: "error" },
+  };
+
+  const columns: GridColDef[] = [
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 1,
+      minWidth: 180,
+    },
+    {
+      field: "subject",
+      headerName: "Subject",
+      flex: 1,
+      minWidth: 150,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 0.5,
+      width: 120,
+      renderCell: (params) => {
+        const config = statusConfig[params.value] ?? {
+          label: params.value,
+          color: "default",
+        };
+        return (
+          <Chip
+            label={config.label}
+            color={config.color}
+            size="small"
+            className="status-chip"
+          />
+        );
+      },
+    },
+    {
+      field: "created_at",
+      headerName: "Created Date",
+      flex: 0.5,
+      width: 150,
+      renderCell: (params) => dayjs(params.value).format("DD MMM YYYY"),
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      width: 130,
+      sortable: false,
+      filterable: false,
+      renderCell: (_params) => (
+        <Grid className="action-cell">
+          <IconButton size="small" className="action-btn action-btn--view">
+            <VisibilityOutlined fontSize="small" />
+          </IconButton>
+          <IconButton size="small" className="action-btn action-btn--edit">
+            <EditOutlined fontSize="small" />
+          </IconButton>
+          <IconButton size="small" className="action-btn action-btn--delete">
+            <DeleteOutlined fontSize="small" />
+          </IconButton>
+        </Grid>
+      ),
+    },
+  ];
+
   return (
     <Grid className="dashboard-container">
       <Grid className="dashboard-header">
         <Typography className="dashboard-title">Dashboard</Typography>
-        <Button variant="contained">Create New Test</Button>
+        <Button variant="contained" onClick={() => navigate("/test-creation")}>
+          Create New Test
+        </Button>
       </Grid>
 
       <Grid className="dashboard-filter-row">

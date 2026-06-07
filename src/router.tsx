@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { LinearProgress } from "@mui/material";
+import CreateTestContextProvider from "./Components/createTest/createTestContext";
 
 const PageLoader = () => (
   <LinearProgress
@@ -11,6 +12,9 @@ const PageLoader = () => (
 const Root = lazy(() => import("./Root"));
 const AuthWrapper = lazy(() => import("./authWrapper"));
 const Dashboard = lazy(() => import("./Components/Dashboard/Dashboard"));
+const CreateTestLanding = lazy(
+  () => import("./Components/createTest/CreateTestLanding"),
+);
 
 const router = createBrowserRouter([
   {
@@ -38,6 +42,18 @@ const router = createBrowserRouter([
             <AuthWrapper>
               <Dashboard />
             </AuthWrapper>
+          </Suspense>
+        ),
+      },
+      {
+        path: "test-creation",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <CreateTestContextProvider>
+              <AuthWrapper>
+                <CreateTestLanding />
+              </AuthWrapper>
+            </CreateTestContextProvider>
           </Suspense>
         ),
       },

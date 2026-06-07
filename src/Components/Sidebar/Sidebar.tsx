@@ -35,7 +35,7 @@ function Sidebar({ open }: SidebarProps) {
     switch (iconName) {
       case "dashboard":
         return <TrendingUpOutlined />;
-      case "manageResource":
+      case "testCreation":
         return <EditOutlined />;
       case "reportsIcon":
         return <AssignmentOutlined />;
