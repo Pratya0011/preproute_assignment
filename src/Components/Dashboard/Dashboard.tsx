@@ -27,6 +27,10 @@ import { useNavigate } from "react-router-dom";
 function Dashboard() {
   const navigate = useNavigate();
   const [testList, setTestList] = useState<ITest[]>([]);
+  const [searchString, setSearchString] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [filteredList, setFilteredList] = useState<ITest[]>([]);
+  const [debounceTimer, setDebounceTimer] = useState(0);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
@@ -40,12 +44,48 @@ function Dashboard() {
     }
     if (status === 200) {
       setTestList(body?.data);
+      setFilteredList(body?.data);
     }
   }, []);
+
+  const applyFilters = useCallback(
+    (search: string, status: string | null) => {
+      const query = search.trim().toLowerCase();
+      setFilteredList(
+        testList.filter((t) => {
+          const matchesSearch = !query || t.name.toLowerCase().includes(query);
+          const matchesStatus = !status || t.status === status;
+          return matchesSearch && matchesStatus;
+        }),
+      );
+    },
+    [testList],
+  );
+
+  const filterProductsBySearch = useCallback(
+    (search: string) => applyFilters(search, selectedStatus),
+    [applyFilters, selectedStatus],
+  );
+
+  const handleFilterState = useCallback(
+    (_e: React.MouseEvent<HTMLElement>, value: string | null) => {
+      setSelectedStatus(value);
+      applyFilters(searchString, value);
+    },
+    [applyFilters, searchString],
+  );
 
   useEffect(() => {
     getAllTests();
   }, [getAllTests]);
+
+  useEffect(() => {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    const timer = setTimeout(() => filterProductsBySearch(searchString), 2000);
+    setDebounceTimer(timer);
+  }, [searchString]);
 
   const statusConfig: Record<
     string,
@@ -135,6 +175,8 @@ function Dashboard() {
           placeholder="Search tests..."
           variant="outlined"
           size="small"
+          value={searchString}
+          onChange={(e) => setSearchString(e.target.value)}
           slotProps={{
             input: {
               startAdornment: (
@@ -149,37 +191,29 @@ function Dashboard() {
         <ToggleButtonGroup
           color="primary"
           exclusive
+          value={selectedStatus}
+          onChange={handleFilterState}
           aria-label="test-status-filter"
           className="filter-toggle-group"
         >
-          <ToggleButton
-            value="published"
-            className="filter-toggle-btn filter-toggle-btn--left"
-            sx={{
-              padding: "0px 23px",
-              // padding: payload.contest_status === 1 ? "0px 31px" : "0px 23px",
-              // backgroundColor: payload.contest_status === 1 ? "#e8def8" : "transparent",
-            }}
-          >
-            Published
+          <ToggleButton value="draft" className="filter-toggle-btn filter-toggle-btn--left" sx={{ padding: "0px 23px" }}>
+            Draft
           </ToggleButton>
-          <ToggleButton
-            value="draft"
-            className="filter-toggle-btn filter-toggle-btn--right"
-            sx={{
-              padding: "0px 23px",
-              // padding: payload.contest_status === 2 ? "0px 31px" : "0px 23px",
-              // backgroundColor: payload.contest_status === 2 ? "#e8def8" : "transparent",
-            }}
-          >
-            Active
+          <ToggleButton value="live" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+            Live
+          </ToggleButton>
+          <ToggleButton value="unpublished" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+            Unpublished
+          </ToggleButton>
+          <ToggleButton value="scheduled" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+            Scheduled
           </ToggleButton>
         </ToggleButtonGroup>
       </Grid>
 
       <Grid className="dashboard-table">
         <DataGrid
-          rows={testList}
+          rows={filteredList}
           columns={columns}
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}

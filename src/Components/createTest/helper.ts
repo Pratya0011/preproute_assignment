@@ -41,18 +41,18 @@ export interface ISTopic {
 
 export const initialValues: ICreateTestForm = {
   name: "",
-  type: "",
+  type: "chapterwise",
   subject: "",
   topics: [],
   sub_topics: [],
   correct_marks: 0,
   wrong_marks: 0,
   unattempt_marks: 0,
-  difficulty: "",
+  difficulty: "easy",
   total_time: 0,
   total_marks: 0,
   total_questions: 0,
-  status: null,
+  status: "draft",
   map_all_topics: false,
   map_all_sub_topics: false,
 };

@@ -37,7 +37,7 @@ function Sidebar({ open }: SidebarProps) {
         return <TrendingUpOutlined />;
       case "testCreation":
         return <EditOutlined />;
-      case "reportsIcon":
+      case "testTracking":
         return <AssignmentOutlined />;
     }
   }, []);

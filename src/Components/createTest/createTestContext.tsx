@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 
 const CreateTestContext = createContext({});
 
@@ -7,7 +7,18 @@ export const useCreateTestContext = () => {
 };
 
 const CreateTestContextProvider = (props: any) => {
-  const value = {};
+  const [contextState, setContextState] = useState<any>({
+    testId:"",
+    activeStep:0
+  })
+  const value = useMemo(
+    () => ({
+      contextState,
+      setContextState,
+      
+    }),
+    [contextState]
+  );
 
   return (
     <CreateTestContext.Provider value={value}>
