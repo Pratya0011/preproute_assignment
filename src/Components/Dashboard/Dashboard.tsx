@@ -87,14 +87,20 @@ function Dashboard() {
     setDebounceTimer(timer);
   }, [searchString]);
 
+  // live, unpublished, scheduled, expired, draft
+
   const statusConfig: Record<
     string,
-    { label: string; color: "success" | "warning" | "error" | "default" }
+    {
+      label: string;
+      color: "success" | "warning" | "error" | "default" | "info";
+    }
   > = {
     live: { label: "Live", color: "success" },
     draft: { label: "Draft", color: "warning" },
-    scheduled: { label: "Scheduled", color: "default" },
+    scheduled: { label: "Scheduled", color: "info" },
     expired: { label: "Expired", color: "error" },
+    unpublished: { label: "Unpublished", color: "default" },
   };
 
   const columns: GridColDef[] = [
@@ -117,7 +123,7 @@ function Dashboard() {
       width: 120,
       renderCell: (params) => {
         const config = statusConfig[params.value] ?? {
-          label: params.value,
+          label: params.value || "NA",
           color: "default",
         };
         return (
@@ -149,7 +155,11 @@ function Dashboard() {
           <IconButton size="small" className="action-btn action-btn--view">
             <VisibilityOutlined fontSize="small" />
           </IconButton>
-          <IconButton size="small" className="action-btn action-btn--edit">
+          <IconButton
+            size="small"
+            className="action-btn action-btn--edit"
+            onClick={() => navigate(`/test-edit/${_params.row.id}`)}
+          >
             <EditOutlined fontSize="small" />
           </IconButton>
           <IconButton size="small" className="action-btn action-btn--delete">
@@ -196,17 +206,40 @@ function Dashboard() {
           aria-label="test-status-filter"
           className="filter-toggle-group"
         >
-          <ToggleButton value="draft" className="filter-toggle-btn filter-toggle-btn--left" sx={{ padding: "0px 23px" }}>
+          <ToggleButton
+            value="draft"
+            className="filter-toggle-btn filter-toggle-btn--left"
+            sx={{ padding: "0px 23px" }}
+          >
             Draft
           </ToggleButton>
-          <ToggleButton value="live" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+          <ToggleButton
+            value="live"
+            className="filter-toggle-btn filter-toggle-btn--right"
+            sx={{ padding: "0px 23px" }}
+          >
             Live
           </ToggleButton>
-          <ToggleButton value="unpublished" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+          <ToggleButton
+            value="unpublished"
+            className="filter-toggle-btn filter-toggle-btn--right"
+            sx={{ padding: "0px 23px" }}
+          >
             Unpublished
           </ToggleButton>
-          <ToggleButton value="scheduled" className="filter-toggle-btn filter-toggle-btn--right" sx={{ padding: "0px 23px" }}>
+          <ToggleButton
+            value="scheduled"
+            className="filter-toggle-btn filter-toggle-btn--right"
+            sx={{ padding: "0px 23px" }}
+          >
             Scheduled
+          </ToggleButton>
+          <ToggleButton
+            value="expired"
+            className="filter-toggle-btn filter-toggle-btn--right"
+            sx={{ padding: "0px 23px" }}
+          >
+            Expired
           </ToggleButton>
         </ToggleButtonGroup>
       </Grid>

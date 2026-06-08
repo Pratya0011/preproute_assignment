@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
-import { useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "./Components/Header/Header";
 import Sidebar, {
   COLLAPSED_WIDTH,
@@ -10,9 +10,11 @@ import Sidebar, {
 import useUserRolePermissions from "./Components/userRolePermission";
 import { useMatch } from "react-router-dom";
 import ErrorBoundary from "./Components/ErrorBoundary/ErrorBoundary";
+import { handleSidebarToggle } from "./_store/reducer/commonStore";
 
 function Layout(props: any) {
   const sidebarToggle = useSelector((state: any) => state?.common?.sidebarOpen);
+  const dispatch = useDispatch();
   const menuObj: any = useUserRolePermissions();
   const match = useMatch(location.pathname)!;
   const loggedInUserDetails = useSelector(
@@ -33,6 +35,13 @@ function Layout(props: any) {
     return isAccess.length > 0;
   }, [match.pathname, loggedInUserDetails?.role, menuObj.combinedMenu]);
 
+  useEffect(() => {
+    const pathname = match.pathname.split("/");
+    if (pathname[1] !== "test-edit" && pathname[1] !== "test-creation") {
+      dispatch(handleSidebarToggle(true));
+    }
+  }, [match.pathname]);
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <Sidebar open={sidebarToggle} />
@@ -41,10 +50,10 @@ function Layout(props: any) {
         <Box
           component="main"
           sx={{
-            flexGrow: 1,
             ml: `${sidebarToggle ? EXPANDED_WIDTH : COLLAPSED_WIDTH}px`,
+            width: `calc(100% - ${sidebarToggle ? EXPANDED_WIDTH : COLLAPSED_WIDTH}px)`,
             mt: `${LOGO_HEIGHT}px`,
-            transition: "margin-left 0.25s ease",
+            transition: "margin-left 0.25s ease, width 0.25s ease",
             minHeight: `calc(100vh - ${LOGO_HEIGHT}px)`,
           }}
         >

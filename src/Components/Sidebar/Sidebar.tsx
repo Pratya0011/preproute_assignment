@@ -57,7 +57,7 @@ function Sidebar({ open }: SidebarProps) {
           height: LOGO_HEIGHT,
           borderBottom: !open ? "1px solid #e5e7eb" : "none",
           borderRight: !open ? "1px solid #e5e7eb" : "none",
-          paddingBottom: !open ? 10 : 0,
+          paddingBottom: !open ? 9 : 0,
         }}
       >
         <img src={logo} alt="Preproute" height="41px" />
@@ -80,45 +80,47 @@ function Sidebar({ open }: SidebarProps) {
           {menuObj.combinedMenu.map((item: any) => {
             const isActive = location.pathname === item.to;
             return (
-              <Tooltip
-                key={item?.label}
-                title={open ? "" : item?.label}
-                placement="right"
-              >
-                <ListItemButton
-                  selected={isActive}
-                  onClick={() => navigate(item.to)}
-                  className="nav-item"
-                  sx={{
-                    justifyContent: open ? "flex-start" : "center",
-                    px: open ? 1.5 : 1,
-                    borderLeft: isActive ? "5px solid #384EC7" : "none",
-                  }}
+              item.isMenu && (
+                <Tooltip
+                  key={item?.label}
+                  title={open ? "" : item?.label}
+                  placement="right"
                 >
-                  <ListItemIcon
+                  <ListItemButton
+                    selected={isActive}
+                    onClick={() => navigate(item.to)}
+                    className="nav-item"
                     sx={{
-                      minWidth: open ? 36 : "auto",
-                      color: isActive ? "#384EC7" : "#6B7280",
+                      justifyContent: open ? "flex-start" : "center",
+                      px: open ? 1.5 : 1,
+                      borderLeft: isActive ? "5px solid #384EC7" : "none",
                     }}
                   >
-                    {getMenuIcon(item?.icon)}
-                  </ListItemIcon>
-                  {open && (
-                    <ListItemText
-                      primary={item?.label}
-                      slotProps={{
-                        primary: {
-                          sx: {
-                            fontSize: 16,
-                            fontWeight: 500,
-                            color: isActive ? "#384EC7" : "#6B7180",
-                          },
-                        },
+                    <ListItemIcon
+                      sx={{
+                        minWidth: open ? 36 : "auto",
+                        color: isActive ? "#384EC7" : "#6B7280",
                       }}
-                    />
-                  )}
-                </ListItemButton>
-              </Tooltip>
+                    >
+                      {getMenuIcon(item?.icon)}
+                    </ListItemIcon>
+                    {open && (
+                      <ListItemText
+                        primary={item?.label}
+                        slotProps={{
+                          primary: {
+                            sx: {
+                              fontSize: 16,
+                              fontWeight: 500,
+                              color: isActive ? "#384EC7" : "#6B7180",
+                            },
+                          },
+                        }}
+                      />
+                    )}
+                  </ListItemButton>
+                </Tooltip>
+              )
             );
           })}
         </List>

@@ -57,6 +57,18 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      {
+        path: "/test-edit/:testId",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <CreateTestContextProvider>
+              <AuthWrapper>
+                <CreateTestLanding />
+              </AuthWrapper>
+            </CreateTestContextProvider>
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);

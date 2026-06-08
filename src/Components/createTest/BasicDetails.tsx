@@ -43,9 +43,8 @@ const breadcrumbSx = {
 };
 
 function BasicDetails() {
-  const { testId } = useParams();
   const navigate = useNavigate();
-  const { setContextState }: any = useCreateTestContext();
+  const { contextState, setContextState }: any = useCreateTestContext();
   const [activeType, setActiveType] = useState<string>("Chapterwise");
   const [buttonText, setButtonText] = useState<string>("Save as Draft");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -70,7 +69,7 @@ function BasicDetails() {
     { label: "Edit Test Creation" },
   ];
 
-  const breadcrumbs = testId ? editBreadcrumbs : createBreadcrumbs;
+  const breadcrumbs = contextState.testId ? editBreadcrumbs : createBreadcrumbs;
 
   const getSubjectList = async () => {
     const { status, body } = await getApi("/subjects");
@@ -116,7 +115,9 @@ function BasicDetails() {
   const schema = Yup.object().shape({
     name: Yup.string().required("Field is required"),
     subject: Yup.string().required("Field is required"),
-    topics: Yup.array().min(1, "Select at least one topic").required("Field is required"),
+    topics: Yup.array()
+      .min(1, "Select at least one topic")
+      .required("Field is required"),
     total_time: Yup.number()
       .required("Field is required")
       .min(1, "Must be at least 1"),
@@ -140,8 +141,12 @@ function BasicDetails() {
       if (buttonText === "Save as Draft") {
         enqueueSnackbar(body.message, { variant: "success" });
         navigate("/dashboard");
-      }else{
-        setContextState(1)
+      } else {
+        setContextState((prev: any) => ({
+          ...prev,
+          activeStep: 1,
+          type: "addQuestion",
+        }));
       }
     },
   });
@@ -284,13 +289,20 @@ function BasicDetails() {
                   onChange={(e: any, val: any) => {
                     const isSelectAll = val.find((option: any) => option.all);
                     if (isSelectAll) {
-                      if (field.value?.length === assessmentData.topicList?.length) {
+                      if (
+                        field.value?.length === assessmentData.topicList?.length
+                      ) {
                         form.setFieldValue(field.name, []);
                         form.setFieldValue("sub_topics", []);
                         formik.setFieldValue("map_all_topics", false);
-                        setAssessmentData((prev: any) => ({ ...prev, subTopicList: [] }));
+                        setAssessmentData((prev: any) => ({
+                          ...prev,
+                          subTopicList: [],
+                        }));
                       } else {
-                        const allIds = assessmentData.topicList.map((each: any) => each?.id);
+                        const allIds = assessmentData.topicList.map(
+                          (each: any) => each?.id,
+                        );
                         form.setFieldValue(field.name, allIds);
                         form.setFieldValue("sub_topics", []);
                         formik.setFieldValue("map_all_topics", true);
@@ -304,11 +316,18 @@ function BasicDetails() {
                       if (selectedIds.length > 0) {
                         getSubTopicsByTopicIds(selectedIds);
                       } else {
-                        setAssessmentData((prev: any) => ({ ...prev, subTopicList: [] }));
+                        setAssessmentData((prev: any) => ({
+                          ...prev,
+                          subTopicList: [],
+                        }));
                       }
                     }
                   }}
-                  renderOption={(props: any, option: any, { selected }: any) => (
+                  renderOption={(
+                    props: any,
+                    option: any,
+                    { selected }: any,
+                  ) => (
                     <li {...props}>
                       <Checkbox
                         style={{ marginRight: 8 }}
@@ -316,7 +335,8 @@ function BasicDetails() {
                           formik.values?.map_all_topics
                             ? formik.values?.map_all_topics
                             : option.all
-                              ? field.value?.length === assessmentData.topicList?.length
+                              ? field.value?.length ===
+                                assessmentData.topicList?.length
                               : selected
                         }
                       />
@@ -336,11 +356,18 @@ function BasicDetails() {
                         (option: any) =>
                           !option.name.toLowerCase().startsWith(lowercaseInput),
                       );
-                      startsWith.sort((a: any, b: any) => a.name.length - b.name.length);
-                      contains.sort((a: any, b: any) => a.name.length - b.name.length);
+                      startsWith.sort(
+                        (a: any, b: any) => a.name.length - b.name.length,
+                      );
+                      contains.sort(
+                        (a: any, b: any) => a.name.length - b.name.length,
+                      );
                       return [...startsWith, ...contains];
                     }
-                    if (!filtered.some((opt) => opt.all) && options.length > 0) {
+                    if (
+                      !filtered.some((opt) => opt.all) &&
+                      options.length > 0
+                    ) {
                       filtered.unshift({ name: "Select All", all: true });
                     }
                     return filtered;
@@ -379,11 +406,16 @@ function BasicDetails() {
                   onChange={(e: any, val: any) => {
                     const isSelectAll = val.find((option: any) => option.all);
                     if (isSelectAll) {
-                      if (field.value?.length === assessmentData.subTopicList?.length) {
+                      if (
+                        field.value?.length ===
+                        assessmentData.subTopicList?.length
+                      ) {
                         form.setFieldValue(field.name, []);
                         formik.setFieldValue("map_all_sub_topics", false);
                       } else {
-                        const allIds = assessmentData.subTopicList.map((each: any) => each?.id);
+                        const allIds = assessmentData.subTopicList.map(
+                          (each: any) => each?.id,
+                        );
                         form.setFieldValue(field.name, allIds);
                         formik.setFieldValue("map_all_sub_topics", true);
                       }
@@ -393,7 +425,11 @@ function BasicDetails() {
                       formik.setFieldValue("map_all_sub_topics", false);
                     }
                   }}
-                  renderOption={(props: any, option: any, { selected }: any) => (
+                  renderOption={(
+                    props: any,
+                    option: any,
+                    { selected }: any,
+                  ) => (
                     <li {...props}>
                       <Checkbox
                         style={{ marginRight: 8 }}
@@ -401,7 +437,8 @@ function BasicDetails() {
                           formik.values?.map_all_sub_topics
                             ? formik.values?.map_all_sub_topics
                             : option.all
-                              ? field.value?.length === assessmentData.subTopicList?.length
+                              ? field.value?.length ===
+                                assessmentData.subTopicList?.length
                               : selected
                         }
                       />
@@ -421,11 +458,18 @@ function BasicDetails() {
                         (option: any) =>
                           !option.name.toLowerCase().startsWith(lowercaseInput),
                       );
-                      startsWith.sort((a: any, b: any) => a.name.length - b.name.length);
-                      contains.sort((a: any, b: any) => a.name.length - b.name.length);
+                      startsWith.sort(
+                        (a: any, b: any) => a.name.length - b.name.length,
+                      );
+                      contains.sort(
+                        (a: any, b: any) => a.name.length - b.name.length,
+                      );
                       return [...startsWith, ...contains];
                     }
-                    if (!filtered.some((opt) => opt.all) && options.length > 0) {
+                    if (
+                      !filtered.some((opt) => opt.all) &&
+                      options.length > 0
+                    ) {
                       filtered.unshift({ name: "Select All", all: true });
                     }
                     return filtered;
@@ -467,7 +511,9 @@ function BasicDetails() {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }} className="input-group">
-            <Typography className="input-label">Test Difficulty Level</Typography>
+            <Typography className="input-label">
+              Test Difficulty Level
+            </Typography>
             <Field name="difficulty">
               {({ field, form }: any) => (
                 <RadioGroup
@@ -493,7 +539,9 @@ function BasicDetails() {
 
         <Grid container spacing={5} className="marking-scheme-container">
           <Grid size={{ xs: 12 }}>
-            <Typography className="marking-scheme-title">Marking Scheme:</Typography>
+            <Typography className="marking-scheme-title">
+              Marking Scheme:
+            </Typography>
           </Grid>
 
           <Grid className="schema-container">
@@ -502,7 +550,11 @@ function BasicDetails() {
               { label: "Unattempted", name: "unattempt_marks" },
               { label: "Correct Answer", name: "correct_marks" },
             ].map(({ label, name }) => (
-              <Grid key={name} size={{ xs: 6, sm: "auto" }} className="input-group">
+              <Grid
+                key={name}
+                size={{ xs: 6, sm: "auto" }}
+                className="input-group"
+              >
                 <Typography className="input-label">{label}</Typography>
                 <Field name={name}>
                   {({ field, form }: any) => (
@@ -514,28 +566,10 @@ function BasicDetails() {
                         const value = Number(e.target.value);
                         form.setFieldValue(
                           name,
-                          field.name === "correct_marks" ? Math.max(0, value) : value,
+                          field.name === "correct_marks"
+                            ? Math.max(0, value)
+                            : value,
                         );
-                      }}
-                      slotProps={{
-                        input: {
-                          endAdornment: (
-                            <Box sx={{ display: "flex", flexDirection: "column" }}>
-                              <IconButton
-                                size="small"
-                                onClick={() => form.setFieldValue(name, field.value + 1)}
-                              >
-                                <KeyboardArrowUpIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                onClick={() => form.setFieldValue(name, field.value - 1)}
-                              >
-                                <KeyboardArrowDownIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          ),
-                        },
                       }}
                     />
                   )}
@@ -574,7 +608,12 @@ function BasicDetails() {
               </Typography>
               <Field name="total_marks">
                 {({ field }: any) => (
-                  <TextField {...field} fullWidth placeholder="Ex:250 Marks" disabled />
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="Ex:250 Marks"
+                    disabled
+                  />
                 )}
               </Field>
             </Grid>
