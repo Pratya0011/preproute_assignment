@@ -19,7 +19,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import dayjs from "dayjs";
 import { enqueueSnackbar } from "notistack";
 import { useCallback, useEffect, useState } from "react";
-import { getApi } from "../../_api/_api";
+import { deleteApi, getApi } from "../../_api/_api";
 import "./Dashboard.scss";
 import { ITest } from "./helper";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +46,16 @@ function Dashboard() {
       setTestList(body?.data);
       setFilteredList(body?.data);
     }
+  }, []);
+
+  const deleteTest = useCallback(async (testId: string) => {
+    const { status, body } = await deleteApi(`/tests/${testId}`);
+    if (status >= 400 && status <= 599) {
+      enqueueSnackbar(body.message, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar(body.message, { variant: "success" });
+    getAllTests();
   }, []);
 
   const applyFilters = useCallback(
@@ -88,6 +98,12 @@ function Dashboard() {
   }, [searchString]);
 
   // live, unpublished, scheduled, expired, draft
+
+  const handleViewTest = (testId: string) => {
+    navigate(`/test-edit/${testId}`, {
+      state: { activeStep: 1, isView: true },
+    });
+  };
 
   const statusConfig: Record<
     string,
@@ -152,7 +168,11 @@ function Dashboard() {
       filterable: false,
       renderCell: (_params) => (
         <Grid className="action-cell">
-          <IconButton size="small" className="action-btn action-btn--view">
+          <IconButton
+            size="small"
+            className="action-btn action-btn--view"
+            onClick={() => handleViewTest(_params.row.id)}
+          >
             <VisibilityOutlined fontSize="small" />
           </IconButton>
           <IconButton
@@ -162,7 +182,11 @@ function Dashboard() {
           >
             <EditOutlined fontSize="small" />
           </IconButton>
-          <IconButton size="small" className="action-btn action-btn--delete">
+          <IconButton
+            size="small"
+            className="action-btn action-btn--delete"
+            onClick={() => deleteTest(_params.row.id)}
+          >
             <DeleteOutlined fontSize="small" />
           </IconButton>
         </Grid>

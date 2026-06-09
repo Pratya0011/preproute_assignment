@@ -20,3 +20,14 @@ export const createQueryParams = (payload: any) => {
   });
   return "?" + new URLSearchParams(p).toString();
 };
+
+export const findByName = <T extends { id: string; name: string }>(
+  name: string,
+  arr: T[],
+): T | undefined => arr.find((item) => item.name === name);
+
+export const filterIdByName = (data: string[], arr: { id: string; name: string }[]): string[] => {
+  return data
+    .map((name) => arr.find((item) => item.name === name)?.id)
+    .filter(Boolean) as string[];
+};

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useMemo, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { getApi } from "../../_api/_api";
 import { ITestDetails } from "./helper";
 
@@ -11,16 +11,32 @@ export const useCreateTestContext = () => {
 
 const CreateTestContextProvider = (props: any) => {
   const { testId } = useParams();
+  const location = useLocation();
+  const navState = (location.state ?? {}) as {
+    activeStep?: number;
+    isView?: boolean;
+  };
   const [contextState, setContextState] = useState<any>({
-    // testId: "f4e504a6-7088-4729-ba8f-1c8e15f917e8" || testId,
-    testId: "",
+    testId: testId || "",
     activeStep: 0,
     type: "createTest",
-    // type: "addQuestion",
     testDetails: null as ITestDetails | null,
     questions: [],
     currentQuestionIndex: 0,
+    isQuestionsCreatedAndSaved: false,
+    isEdit: false,
+    disabled: false,
   });
+
+  useEffect(() => {
+    setContextState((prev: any) => ({
+      ...prev,
+      type: navState.activeStep === 1 ? "addQuestion" : "createTest",
+      isEdit: testId ? true : false,
+      disabled: navState.isView ?? false,
+      activeStep: navState.activeStep,
+    }));
+  }, [testId, navState.isView]);
 
   useEffect(() => {
     if (!contextState.testId) return;
@@ -36,7 +52,7 @@ const CreateTestContextProvider = (props: any) => {
     }));
   };
 
-  console.log(".....contextState....", contextState)
+  console.log(".....contextState....", contextState);
 
   const value = useMemo(
     () => ({

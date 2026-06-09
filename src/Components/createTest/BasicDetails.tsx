@@ -1,6 +1,5 @@
 import {
   Autocomplete,
-  Box,
   Breadcrumbs,
   Button,
   Checkbox,
@@ -11,24 +10,22 @@ import {
   DialogTitle,
   FormControlLabel,
   Grid,
-  IconButton,
   Link,
   Radio,
   RadioGroup,
   TextField,
   Typography,
 } from "@mui/material";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Field, FormikProvider, useFormik } from "formik";
 import { enqueueSnackbar } from "notistack";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-import { getApi, postApi } from "../../_api/_api";
+import { getApi, postApi, putApi } from "../../_api/_api";
 import "./createTest.scss";
-import { initialValues, ISTopic, ISubject, ITopic } from "./helper";
 import { useCreateTestContext } from "./createTestContext";
+import { initialValues, ISTopic, ISubject, ITopic } from "./helper";
+import { filterIdByName, findByName } from "../helper";
 
 const TEST_TYPES = ["Chapterwise", "PYQ", "Mock Test"];
 
@@ -48,6 +45,7 @@ function BasicDetails() {
   const [activeType, setActiveType] = useState<string>("Chapterwise");
   const [buttonText, setButtonText] = useState<string>("Save as Draft");
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const prefillDone = useRef(false);
   const [assessmentData, setAssessmentData] = useState<{
     subjectList: ISubject[];
     topicList: ITopic[];
@@ -83,34 +81,80 @@ function BasicDetails() {
     }));
   };
 
-  const getTopicListBySubjectId = async (subjectId: string) => {
+  const getTopicListBySubjectId = async (
+    subjectId: string,
+  ): Promise<ITopic[]> => {
     const { status, body } = await getApi(`/topics/subject/${subjectId}`);
     if (status >= 400 && status <= 599) {
       enqueueSnackbar("Failed to fetch Topics", { variant: "error" });
-      return;
+      return [];
     }
-    setAssessmentData((prev) => ({
-      ...prev,
-      topicList: body?.data,
-    }));
+    setAssessmentData((prev) => ({ ...prev, topicList: body?.data }));
+    return body?.data ?? [];
   };
 
-  const getSubTopicsByTopicIds = async (_topicIds: string[]) => {
+  const getSubTopicsByTopicIds = async (
+    _topicIds: string[],
+  ): Promise<ISTopic[]> => {
     const payload = { topicIds: _topicIds };
     const { status, body } = await postApi("/sub-topics/multi-topics", payload);
     if (status >= 400 && status <= 599) {
       enqueueSnackbar("Failed to fetch Sub Topics", { variant: "error" });
-      return;
+      return [];
     }
-    setAssessmentData((prev) => ({
-      ...prev,
-      subTopicList: body?.data,
-    }));
+    setAssessmentData((prev) => ({ ...prev, subTopicList: body?.data }));
+    return body?.data ?? [];
+  };
+
+  const prefillEditForm = async () => {
+    if (prefillDone.current) return;
+    if (
+      !contextState.testId ||
+      !contextState.testDetails ||
+      !assessmentData.subjectList.length
+    )
+      return;
+    prefillDone.current = true;
+    const td = contextState.testDetails;
+
+    const subjectObj = findByName(td.subject, assessmentData.subjectList);
+    if (!subjectObj) return;
+
+    formik.setValues({
+      ...formik.values,
+      name: td.name,
+      type: td.type,
+      difficulty: td.difficulty,
+      correct_marks: td.correct_marks,
+      wrong_marks: td.wrong_marks,
+      unattempt_marks: td.unattempt_marks,
+      total_time: td.total_time,
+      total_marks: td.total_marks,
+      total_questions: td.total_questions,
+      status: td.status,
+      subject: subjectObj.id,
+    });
+
+    const topicList = await getTopicListBySubjectId(subjectObj.id);
+    const topicIds = filterIdByName(td.topics, topicList);
+    if (topicIds.length > 0) {
+      formik.setFieldValue("topics", topicIds);
+
+      const subTopicList = await getSubTopicsByTopicIds(topicIds);
+      const subTopicIds = filterIdByName(td.sub_topics, subTopicList);
+      if (subTopicIds.length > 0) {
+        formik.setFieldValue("sub_topics", subTopicIds);
+      }
+    }
   };
 
   useEffect(() => {
     getSubjectList();
   }, []);
+
+  useEffect(() => {
+    prefillEditForm();
+  }, [contextState.testDetails, assessmentData.subjectList]);
 
   const schema = Yup.object().shape({
     name: Yup.string().required("Field is required"),
@@ -132,7 +176,9 @@ function BasicDetails() {
     validationSchema: schema,
     onSubmit: async (values: any) => {
       const { map_all_topics, map_all_sub_topics, ...restValues } = values;
-      const { status, body } = await postApi("/tests", restValues);
+      const { status, body } = contextState.testId
+        ? await putApi(`/tests/${contextState.testId}`, restValues)
+        : await postApi("/tests", restValues);
       if (status >= 400 && status <= 599) {
         enqueueSnackbar("Failed to create test", { variant: "error" });
         return;

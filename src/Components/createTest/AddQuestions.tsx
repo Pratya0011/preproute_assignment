@@ -27,6 +27,7 @@ import think from "../../assets/think.png";
 import { useCreateTestContext } from "./createTestContext";
 import Questions from "./Questions";
 import "./createTest.scss";
+import Publish from "./Publish";
 
 const breadcrumbSx = {
   color: "#6B7180",
@@ -51,7 +52,7 @@ function capitalize(s: string) {
 function AddQuestions() {
   const dispatch = useDispatch();
   const { testId } = useParams();
-  const { contextState }: any = useCreateTestContext();
+  const { contextState, setContextState }: any = useCreateTestContext();
   const testDetails = contextState?.testDetails;
 
   const createBreadcrumbs = [
@@ -94,7 +95,6 @@ function AddQuestions() {
             ),
           )}
         </Breadcrumbs>
-        <Button variant="contained">Publish</Button>
       </Grid>
 
       <Box className="question-body">
@@ -114,13 +114,19 @@ function AddQuestions() {
 
           <Box className="question-list">
             {Array.from(
-              { length: testDetails?.total_questions ?? 0 },
+              { length: contextState?.formQuestionCount ?? 1 },
               (_, i) => {
                 const saved = contextState?.questions?.[i];
                 return (
                   <Box
                     key={i}
                     className={`question-list-item${saved ? " completed" : ""}`}
+                    onClick={() =>
+                      setContextState((prev: any) => ({
+                        ...prev,
+                        currentQuestionIndex: i,
+                      }))
+                    }
                   >
                     {saved ? (
                       <CheckCircleIcon
@@ -160,7 +166,18 @@ function AddQuestions() {
                     className="test-type-chip"
                     size="small"
                   />
-                  <IconButton size="small" className="test-edit-btn">
+                  <IconButton
+                    size="small"
+                    className="test-edit-btn"
+                    onClick={() => {
+                      setContextState((prev: any) => ({
+                        ...prev,
+                        type: "createTest",
+                        activeStep: 0,
+                      }));
+                      dispatch(handleSidebarToggle(true));
+                    }}
+                  >
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </Box>
