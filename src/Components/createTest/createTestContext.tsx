@@ -12,11 +12,11 @@ export const useCreateTestContext = () => {
 const CreateTestContextProvider = (props: any) => {
   const { testId } = useParams();
   const [contextState, setContextState] = useState<any>({
-    testId: "f4e504a6-7088-4729-ba8f-1c8e15f917e8" || testId,
-    // testId: "",
-    activeStep: 1,
-    // type: "createTest",
-    type: "addQuestion",
+    // testId: "f4e504a6-7088-4729-ba8f-1c8e15f917e8" || testId,
+    testId: "",
+    activeStep: 0,
+    type: "createTest",
+    // type: "addQuestion",
     testDetails: null as ITestDetails | null,
     questions: [],
     currentQuestionIndex: 0,
@@ -35,6 +35,8 @@ const CreateTestContextProvider = (props: any) => {
       testDetails: body?.data,
     }));
   };
+
+  console.log(".....contextState....", contextState)
 
   const value = useMemo(
     () => ({
