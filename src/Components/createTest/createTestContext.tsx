@@ -31,17 +31,21 @@ const CreateTestContextProvider = (props: any) => {
   useEffect(() => {
     setContextState((prev: any) => ({
       ...prev,
-      type: navState.activeStep === 1 ? "addQuestion" : "createTest",
+      type: navState.isView
+        ? "publishTest"
+        : navState.activeStep === 2
+          ? "publishTest"
+          : "createTest",
       isEdit: testId ? true : false,
       disabled: navState.isView ?? false,
-      activeStep: navState.activeStep,
+      activeStep: navState.activeStep || 0,
     }));
   }, [testId, navState.isView]);
 
   useEffect(() => {
     if (!contextState.testId) return;
     fetchTestDetails(contextState.testId);
-  }, [contextState.testId]);
+  }, [contextState.testId, contextState.type]);
 
   const fetchTestDetails = async (id: string) => {
     const { status, body } = await getApi(`/tests/${id}`);

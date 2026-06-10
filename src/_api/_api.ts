@@ -6,8 +6,7 @@ const axiosApi = axios.create({
 });
 const handleLogout = () => {
   localStorage.clear();
-  // sessionStorage.clear();
-  // window.location.href = "/";
+  window.location.href = "/";
 };
 axiosApi.interceptors.request.use(async function (configurations: any) {
   const accessToken = localStorage.getItem("token");

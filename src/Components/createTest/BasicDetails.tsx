@@ -120,6 +120,11 @@ function BasicDetails() {
     const subjectObj = findByName(td.subject, assessmentData.subjectList);
     if (!subjectObj) return;
 
+    const matchedType = TEST_TYPES.find(
+      (t) => t.toLowerCase().replace(" ", "_") === td.type,
+    );
+    if (matchedType) setActiveType(matchedType);
+
     formik.setValues({
       ...formik.values,
       name: td.name,
@@ -177,7 +182,10 @@ function BasicDetails() {
     onSubmit: async (values: any) => {
       const { map_all_topics, map_all_sub_topics, ...restValues } = values;
       const { status, body } = contextState.testId
-        ? await putApi(`/tests/${contextState.testId}`, restValues)
+        ? await putApi(`/tests/${contextState.testId}`, {
+            ...restValues,
+            status: "draft",
+          })
         : await postApi("/tests", restValues);
       if (status >= 400 && status <= 599) {
         enqueueSnackbar("Failed to create test", { variant: "error" });
@@ -243,6 +251,10 @@ function BasicDetails() {
             key={type}
             type="text"
             className={`create-test-type-tab${activeType === type ? " active" : ""}`}
+            onClick={() => {
+              setActiveType(type);
+              formik.setFieldValue("type", type.toLowerCase().replace(" ", "_"));
+            }}
           >
             {type}
           </Button>
@@ -569,7 +581,7 @@ function BasicDetails() {
                     form.setFieldValue(field.name, e.target.value.toLowerCase())
                   }
                 >
-                  {["Easy", "Medium", "Difficult"].map((level) => (
+                  {["Easy", "Medium", "Hard"].map((level) => (
                     <FormControlLabel
                       key={level}
                       value={level.toLowerCase()}

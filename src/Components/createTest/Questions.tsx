@@ -1,10 +1,17 @@
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import {
   Autocomplete,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   IconButton,
   Radio,
@@ -12,22 +19,27 @@ import {
   Typography,
 } from "@mui/material";
 import { Field, FieldArray, FormikProvider, useFormik } from "formik";
-import { useEffect } from "react";
+import { enqueueSnackbar } from "notistack";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import * as Yup from "yup";
+import { postApi, putApi } from "../../_api/_api";
 import "./createTest.scss";
 import { useCreateTestContext } from "./createTestContext";
+import CSVUploadModal from "./CSVUploadModal";
 import { questionInitialValues } from "./helper";
-import { getApi, postApi, putApi } from "../../_api/_api";
-import { enqueueSnackbar } from "notistack";
 
 function Questions() {
   const { contextState, setContextState }: any = useCreateTestContext();
+  const navigate = useNavigate();
   const current = contextState?.currentQuestionIndex ?? 0;
   const total = contextState?.testDetails?.total_questions ?? 0;
   const testDetails = contextState?.testDetails;
   const disabled = contextState?.disabled ?? false;
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [csvModalOpen, setCsvModalOpen] = useState(false);
 
   const toolbarOptions = [
     ["bold", "italic", "underline", "strike"],
@@ -54,39 +66,34 @@ function Questions() {
   ];
 
   const schema = Yup.object().shape({
-    questions: Yup.array().of(
-      Yup.object().shape({
-        type: Yup.string().required("Type is required"),
-        question: Yup.string().required("Question is required"),
-        option1: Yup.string().required("Option 1 is required"),
-        option2: Yup.string().required("Option 2 is required"),
-        option3: Yup.string().required("Option 3 is required"),
-        option4: Yup.string().required("Option 4 is required"),
-        correct_option: Yup.string().required("Correct option is required"),
-        explanation: Yup.string().required("Explanation is required"),
-        difficulty: Yup.string().required("Difficulty is required"),
-        test_id: Yup.string().required("Test ID is required"),
-      }),
-    ),
+    questions: Yup.array()
+      .min(1, "At least 1 question is required")
+      .of(
+        Yup.object().shape({
+          type: Yup.string().required("Type is required"),
+          question: Yup.string().required("Question is required"),
+          option1: Yup.string().required("Option 1 is required"),
+          option2: Yup.string().required("Option 2 is required"),
+          option3: Yup.string().required("Option 3 is required"),
+          option4: Yup.string().required("Option 4 is required"),
+          correct_option: Yup.string().required("Correct option is required"),
+          difficulty: Yup.string(),
+          test_id: Yup.string().required("Test ID is required"),
+        }),
+      ),
   });
 
   const formik = useFormik({
     initialValues: {
-      questions: [
-        {
-          ...questionInitialValues,
-          test_id: contextState?.testId ?? "",
-          subject: testDetails.subject,
-        },
-      ],
+      questions: [] as any[],
     },
     validationSchema: schema,
     onSubmit: async (values: any) => {
       let questionData: any = [];
+      const questions = values.questions.map(
+        ({ topic, sub_topic, ...rest }: any) => rest,
+      );
       if (!contextState.isEdit) {
-        const questions = values.questions.map(
-          ({ topic, sub_topic, ...rest }: any) => rest,
-        );
         const { status, body } = await postApi("/questions/bulk", {
           questions,
         });
@@ -94,15 +101,17 @@ function Questions() {
           enqueueSnackbar("Failed to create Question", { variant: "error" });
           return;
         }
-        await putApi(`/tests/${contextState.testId}`, {
-          status: "unpublished",
-        });
         questionData = [...body.data];
       }
+      await putApi(`/tests/${contextState.testId}`, {
+        status: "unpublished",
+      });
+
       setContextState((prev: any) => ({
         ...prev,
         disabled: true,
         questions: questionData,
+        type: "publishTest",
       }));
     },
   });
@@ -124,7 +133,7 @@ function Questions() {
       correct_option: q.correct_option ?? "",
       explanation: q.explanation ?? "",
       difficulty: q.difficulty ?? "",
-      test_id: q.test_id ?? "",
+      test_id: q.test_id ?? contextState?.testId ?? "",
       subject: q.subject ?? "",
       topic: q.topic ?? "",
       sub_topic: q.sub_topic ?? "",
@@ -134,7 +143,6 @@ function Questions() {
       ...prev,
       questions: body.data,
       formQuestionCount: questions.length,
-      disabled: true,
     }));
   };
 
@@ -202,7 +210,20 @@ function Questions() {
     }
   };
 
-  console.log("...formik...", formik.values);
+  const handleAddMCQ = () => {
+    const newQuestion = {
+      ...questionInitialValues,
+      test_id: contextState?.testId ?? "",
+      subject: testDetails?.subject ?? "",
+    };
+    const updated = [...formik.values.questions, newQuestion];
+    formik.setFieldValue("questions", updated);
+    setContextState((prev: any) => ({
+      ...prev,
+      currentQuestionIndex: updated.length - 1,
+    }));
+  };
+
   return (
     <Grid className="question-editor">
       <Grid className="question-editor-header">
@@ -215,6 +236,7 @@ function Questions() {
             variant="text"
             startIcon={<AddIcon />}
             className="question-action-btn"
+            onClick={handleAddMCQ}
           >
             MCQ
           </Button>
@@ -222,6 +244,7 @@ function Questions() {
             variant="text"
             startIcon={<FileDownloadOutlinedIcon />}
             className="question-action-btn"
+            onClick={() => setCsvModalOpen(true)}
           >
             CSV
           </Button>
@@ -238,6 +261,21 @@ function Questions() {
         >
           Delete All Edits
         </Button>
+        {contextState.disabled && (
+          <Button
+            variant="text"
+            startIcon={<EditIcon fontSize="small" />}
+            className="question-delete-btn"
+            onClick={() =>
+              setContextState((prev: any) => ({
+                ...prev,
+                disabled: false,
+              }))
+            }
+          >
+            Enable edit Question
+          </Button>
+        )}
       </Grid>
 
       <FormikProvider value={formik}>
@@ -389,6 +427,25 @@ function Questions() {
                           </Field>
                         </Grid>
 
+                        <Grid className="options-container">
+                          <Typography className="options-label">
+                            Media URL (Optional)
+                          </Typography>
+                          <Field name={`questions[${index}].media_url`}>
+                            {({ field, meta }: any) => (
+                              <TextField
+                                {...field}
+                                fullWidth
+                                placeholder="Paste image or media URL here..."
+                                variant="outlined"
+                                disabled={disabled}
+                                error={meta.touched && !!meta.error}
+                                helperText={meta.touched && meta.error}
+                              />
+                            )}
+                          </Field>
+                        </Grid>
+
                         <Grid className="question-settings-container">
                           <Typography className="question-settings-title">
                             Question settings
@@ -490,6 +547,7 @@ function Questions() {
                               backgroundColor: "#FF7F7F !important",
                               "&:hover": { backgroundColor: "#ff6666" },
                             }}
+                            onClick={() => setExitModalOpen(true)}
                           >
                             Exit Test Creation
                           </Button>
@@ -534,6 +592,110 @@ function Questions() {
           }}
         />
       </FormikProvider>
+
+      <CSVUploadModal
+        open={csvModalOpen}
+        onClose={() => setCsvModalOpen(false)}
+        testId={contextState?.testId ?? ""}
+        subject={testDetails?.subject ?? ""}
+        onQuestionsLoaded={(parsed) => {
+          const existing = formik.values.questions.filter(
+            (q: any) => q.question.trim() !== "",
+          );
+          formik.setFieldValue("questions", [...existing, ...parsed]);
+          setContextState((prev: any) => ({
+            ...prev,
+            formQuestionCount: existing.length + parsed.length,
+            questions: [...parsed],
+          }));
+        }}
+      />
+
+      <Dialog
+        open={exitModalOpen}
+        onClose={() => setExitModalOpen(false)}
+        PaperProps={{
+          sx: { borderRadius: "16px", padding: "8px", maxWidth: 400 },
+        }}
+      >
+        <DialogContent>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 2,
+              pt: 2,
+              pb: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                backgroundColor: "#fff3f3",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <WarningAmberRoundedIcon
+                sx={{ color: "#FF7F7F", fontSize: 36 }}
+              />
+            </Box>
+            <Typography
+              sx={{ fontSize: 18, fontWeight: 700, color: "#07013c" }}
+            >
+              Exit Test Creation?
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: 14,
+                color: "#6b7280",
+                textAlign: "center",
+                lineHeight: 1.6,
+              }}
+            >
+              Any unsaved progress will be lost. Are you sure you want to leave?
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 3 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setExitModalOpen(false)}
+            sx={{
+              borderRadius: "10px",
+              px: 4,
+              textTransform: "none",
+              fontWeight: 600,
+              borderColor: "#e5e7eb",
+              color: "#374151",
+              "&:hover": { borderColor: "#d1d5db", background: "#f9fafb" },
+            }}
+          >
+            Stay
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setExitModalOpen(false);
+              navigate("/dashboard");
+            }}
+            sx={{
+              borderRadius: "10px",
+              px: 4,
+              textTransform: "none",
+              fontWeight: 600,
+              backgroundColor: "#FF7F7F",
+              "&:hover": { backgroundColor: "#ff6666" },
+            }}
+          >
+            Exit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }

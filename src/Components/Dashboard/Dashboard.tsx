@@ -7,6 +7,11 @@ import {
 import {
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   IconButton,
   InputAdornment,
@@ -35,6 +40,7 @@ function Dashboard() {
     page: 0,
     pageSize: 10,
   });
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const getAllTests = useCallback(async () => {
     const { status, body } = await getApi(`/tests`);
@@ -101,7 +107,7 @@ function Dashboard() {
 
   const handleViewTest = (testId: string) => {
     navigate(`/test-edit/${testId}`, {
-      state: { activeStep: 1, isView: true },
+      state: { activeStep: 2, isView: true },
     });
   };
 
@@ -185,7 +191,7 @@ function Dashboard() {
           <IconButton
             size="small"
             className="action-btn action-btn--delete"
-            onClick={() => deleteTest(_params.row.id)}
+            onClick={() => setDeleteConfirm(_params.row.id)}
           >
             <DeleteOutlined fontSize="small" />
           </IconButton>
@@ -281,6 +287,28 @@ function Dashboard() {
           className="test-data-grid"
         />
       </Grid>
+
+      <Dialog open={!!deleteConfirm} onClose={() => setDeleteConfirm(null)}>
+        <DialogTitle>Delete Test?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This action cannot be undone. Are you sure you want to delete this test?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              if (deleteConfirm) deleteTest(deleteConfirm);
+              setDeleteConfirm(null);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }

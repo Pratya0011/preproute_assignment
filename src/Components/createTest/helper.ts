@@ -77,6 +77,7 @@ export interface IQuestionForm {
   correct_option: string;
   explanation: string;
   difficulty: string;
+  media_url: string;
   test_id: string;
 }
 
@@ -90,6 +91,7 @@ export const questionInitialValues: IQuestionForm = {
   correct_option: "",
   explanation: "",
   difficulty: "easy",
+  media_url: "",
   test_id: "",
 };
 

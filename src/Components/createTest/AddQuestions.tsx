@@ -1,4 +1,5 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -18,16 +19,18 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import { enqueueSnackbar } from "notistack";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { putApi } from "../../_api/_api";
 import { handleSidebarToggle } from "../../_store/reducer/commonStore";
 import menu from "../../assets/menu.png";
 import think from "../../assets/think.png";
-import { useCreateTestContext } from "./createTestContext";
-import Questions from "./Questions";
 import "./createTest.scss";
+import { useCreateTestContext } from "./createTestContext";
 import Publish from "./Publish";
+import Questions from "./Questions";
 
 const breadcrumbSx = {
   color: "#6B7180",
@@ -52,13 +55,20 @@ function capitalize(s: string) {
 function AddQuestions() {
   const dispatch = useDispatch();
   const { testId } = useParams();
+  const navigate = useNavigate();
   const { contextState, setContextState }: any = useCreateTestContext();
   const testDetails = contextState?.testDetails;
+
+  const testTypeLabel = testDetails?.type
+    ? testDetails.type
+        .replace("_", " ")
+        .replace(/\b\w/g, (c: string) => c.toUpperCase())
+    : "";
 
   const createBreadcrumbs = [
     { label: "Test Creation" },
     { label: "Create Test" },
-    { label: "Chapter Wise" },
+    { label: testTypeLabel },
   ];
 
   const editBreadcrumbs = [
@@ -75,6 +85,18 @@ function AddQuestions() {
   useEffect(() => {
     dispatch(handleSidebarToggle(false));
   }, []);
+
+  const publishTest = async () => {
+    const { status, body } = await putApi(`/tests/${contextState.testId}`, {
+      status: "live",
+    });
+    if (status >= 400 && status <= 599) {
+      enqueueSnackbar(body.message, { variant: "error" });
+      return;
+    }
+    enqueueSnackbar("Test published successfully", { variant: "success" });
+    navigate("/dashboard");
+  };
 
   return (
     <Grid className="question-container">
@@ -95,6 +117,11 @@ function AddQuestions() {
             ),
           )}
         </Breadcrumbs>
+        {contextState?.type === "publishTest" && (
+          <Button variant="contained" onClick={publishTest}>
+            Publish
+          </Button>
+        )}
       </Grid>
 
       <Box className="question-body">
@@ -155,6 +182,18 @@ function AddQuestions() {
         <Box className="question-main">
           {testDetails && (
             <>
+              {contextState.type === "publishTest" && (
+                <Box className="publish-header">
+                  <Box>
+                    <Typography className="publish-title">
+                      Preview & Publish
+                    </Typography>
+                    <Typography className="publish-subtitle">
+                      Review your test before publishing
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
               <Paper
                 className="test-details-card"
                 elevation={0}
@@ -162,7 +201,13 @@ function AddQuestions() {
               >
                 <Box className="test-details-top">
                   <Chip
-                    label="Chapter Wise"
+                    label={
+                      testDetails?.type
+                        ? testDetails.type
+                            .replace("_", " ")
+                            .replace(/\b\w/g, (c: string) => c.toUpperCase())
+                        : ""
+                    }
                     className="test-type-chip"
                     size="small"
                   />
@@ -174,6 +219,7 @@ function AddQuestions() {
                         ...prev,
                         type: "createTest",
                         activeStep: 0,
+                        isEdit: true,
                       }));
                       dispatch(handleSidebarToggle(true));
                     }}
@@ -272,6 +318,7 @@ function AddQuestions() {
                 </Box>
               </Paper>
               {contextState.type === "addQuestion" && <Questions />}
+              {contextState.type === "publishTest" && <Publish />}
             </>
           )}
         </Box>
